@@ -1,4 +1,4 @@
-// Drop DynamicWrapperX, Call MessageBox
+// Drop DynamicWrapperX, Call MessageBox x64 only.
 
 try {
 	
