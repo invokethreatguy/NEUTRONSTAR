@@ -5,3 +5,8 @@ The aim of this project is to present some minimalist execution primitives and T
 
 This is an early release, prototype. 
 
+Prerequisites
+
+1. free ngrok version
+2. prelude operator community edition
+
